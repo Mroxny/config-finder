@@ -13,16 +13,19 @@ class ConfigFinder:
         if path not in self.config_paths:
             self.config_paths.append(path)
     
-    def add_files_to_exclude(self, file_type):
-        if file_type not in self.exclude:
-            self.exclude.append(file_type)
-            self.log.add_to_log(f"Added files to exclude: {file_type}")
+    def add_files_to_exclude(self, file_type:list):
+        for f in file_type:
+            if f not in self.exclude:
+                self.exclude.append(file_type)
+        self.log.add_to_log(f"Added files to exclude: {self.exclude}")
 
 
-    def add_files_to_include(self, file_type):
-        if file_type not in self.include:
-            self.include.append(file_type)
-            self.log.add_to_log(f"Added files to include: {file_type}")
+    def add_files_to_include(self, file_type:list):
+        for f in file_type:
+            if f not in self.include:
+                self.include.append(file_type)
+        self.log.add_to_log(f"Added files to exclude: {self.include}")
+        
 
 
     def find_unique_config_files(self):

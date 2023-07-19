@@ -1,56 +1,46 @@
-import sys
 import os
 import configFinder
+import argparse
 
 
 def run():
+    #Handle arguments
+    parser = argparse.ArgumentParser(description='Find distinct config files')
+    parser.add_argument('-e', dest='env', type=str, help='Add main enviroment variable (required)', required=True)
+    parser.add_argument('-E', dest='exclude', action="append", type=str, help='Add files to exclude')
+    parser.add_argument('-I', dest='include', action="append", type=str, help='Add files to include')
+    parser.add_argument('-v', dest='verbose',action="store_true", help='Enable verbose mode')
+    
+    args = parser.parse_args()
+
+    home_env = os.getenv(args.env)
+    exclude = args.exclude
+    include = args.include
+    verbose_mode = args.verbose
+
     finder = configFinder.ConfigFinder()
     logger = finder.log
-    home_env = ""
-    paths = []
 
-    #Handle arguments
-    for i in range(len(sys.argv)):
-
-        if sys.argv[i] == '-v':
-            logger.verbose_mode = True
-            logger.add_to_log("Program started with verbose mode")
+    #Check for basic errors 
+    if exclude is not None and include is not None:
+        print("You can't include and exclude files at the same time")
+        exit(1)
+    elif exclude is not None:
+        finder.add_files_to_exclude(exclude)
+    elif include is not None:
+        finder.add_files_to_include(include)
         
-        elif sys.argv[i] == '-e' or sys.argv[i] == '--env':
-            env_name = sys.argv[i+1]
-            logger.add_to_log(f"Set main enviroment variable: {env_name}")
-
-            home_env = os.getenv(env_name)
-
-        elif sys.argv[i] == '-E' or sys.argv[i] == '--Exclude':
-            if len(finder.include) > 0 :
-                logger.add_to_log("You cannot exclude files when includding", verbose=True)
-                return
-            
-            file_to_exclude = sys.argv[i+1] 
-            finder.add_files_to_exclude(file_to_exclude)
-
-
-        elif sys.argv[i] == '-I' or sys.argv[i] == '--Include':
-            if len(finder.exclude) > 0 :
-                logger.add_to_log("You cannot include files when excludding", verbose=True)
-                return
-            
-            file_to_include = sys.argv[i+1]
-            finder.add_files_to_include(file_to_include)
-
-
-
-    #Check for basic errors        
+    paths = []       
     if home_env is None or home_env == "":
-        logger.add_to_log("Enviroment variable unknown", verbose=True)
-        return
+        logger.add_to_log(f"Enviroment variable '{args.env}' is unknown", verbose=True)
+        exit(1)
+
     else:
         paths = home_env.split(':')
         
     if len(paths) <= 1:
         logger.add_to_log("Not enough paths found", verbose=True)
-        return            
+        exit(1)
 
     for i in paths:
         finder.add_config_path(i)
