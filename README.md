@@ -9,8 +9,8 @@ main.py [-h] -e ENV [-E EXCLUDE] [-I INCLUDE] [-v]
 
 options:
 ----
-  `-h,` `--help`  - show this help message and exit
-  `-e ENV`        - Add main enviroment variable (required)
-  `-E EXCLUDE`    - Add files to exclude
-  `-I INCLUDE`    - Add files to include
-  `-v`            - Enable verbose mode
+  `-h,` `--help`  - show this help message and exit </br>
+  `-e ENV`        - Add main enviroment variable (required) </br>
+  `-E EXCLUDE`    - Add files to exclude </br>
+  `-I INCLUDE`    - Add files to include </br>
+  `-v`            - Enable verbose mode </br>
