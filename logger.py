@@ -1,59 +1,26 @@
-from datetime import datetime
-import os
+import logging
 
-class Logger:
-    def __init__(self):
-        self.file_name = "finder_log.log"
-        self.log_dir = 'logs'
-        self.verbose_mode = False
+class Logger():
+    def __init__(self, file_name = "file.log", verbose:bool = False, format = '[%(asctime)s]: %(levelname)s - %(message)s'):
+        self.logger = logging.getLogger(__name__)
+        self.logfile = file_name
+        self.verbose = verbose
 
-    
+        self.handler_cmdline = logging.StreamHandler()
+        self.handler_file = logging.FileHandler(self.logfile)
 
-    def add_to_log(self, msg, verbose = False):
-        msg = self.format_message(msg)        
+        if self.verbose:
+            self.handler_cmdline.setLevel(logging.DEBUG)
+        else: 
+            self.handler_cmdline.setLevel(logging.ERROR)
 
-        if not os.path.isdir(self.log_dir):
-            self.log_dir = os.path.dirname(os.path.abspath(__file__))
-            self.add_to_log("Log directory not found. Switching to project directory")
-        
-        if self.verbose_mode or verbose:
-            print(msg)
+        self.handler_file.setLevel(logging.DEBUG)
 
-        path = os.path.join(self.log_dir, self.file_name)
+        log_format = logging.Formatter(fmt=format, datefmt='%Y-%m-%d %H:%M:%S')
+        self.handler_cmdline.setFormatter(log_format)
+        self.handler_file.setFormatter(log_format)
 
-        self.write_to_file(file_path=path, msg=msg)
-        self.remove_oldest_lines(file_path=path, num_lines=10000)
-
-
-    def write_to_file(self, file_path, msg):
-        try:
-            with open(file_path, "a") as log_file:
-                log_file.write(f'{msg}\n')
-        except Exception as e:
-            print(self.format_message(e))
-        
-
-    @staticmethod
-    def remove_oldest_lines(file_path, num_lines):
-
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-
-        if len(lines) >= num_lines:
-            new_lines = lines[-num_lines:]
-
-            with open(file_path, 'w') as file:
-                file.writelines(new_lines)
-
-            return True
-        else:
-            return False
-    
-    @staticmethod
-    def format_message(msg):
-        now = datetime.now()
-        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-        return f'LOG[{dt_string}]: {msg}'
-
-
+        self.logger.addHandler(self.handler_cmdline)
+        self.logger.addHandler(self.handler_file)
+        self.logger.setLevel(logging.DEBUG)
 

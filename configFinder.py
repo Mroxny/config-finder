@@ -1,13 +1,11 @@
 import os
-import logger
 
 class ConfigFinder:
-    def __init__(self):
+    def __init__(self, log_class):
         self.config_paths = []
         self.exclude = []
         self.include = []
-        self.log = logger.Logger()
-
+        self.log = log_class.logger
 
     def add_config_path(self, path):
         if path not in self.config_paths:
@@ -17,32 +15,28 @@ class ConfigFinder:
         for f in file_type:
             if f not in self.exclude:
                 self.exclude.append(file_type)
-        self.log.add_to_log(f"Added files to exclude: {self.exclude}")
-
+        self.log.debug(f"Added files to exclude: {self.exclude}")
 
     def add_files_to_include(self, file_type:list):
         for f in file_type:
             if f not in self.include:
                 self.include.append(file_type)
-        self.log.add_to_log(f"Added files to exclude: {self.include}")
-        
+        self.log.debug(f"Added files to exclude: {self.include}")
 
 
     def find_unique_config_files(self):
         config_files = {}
 
-
         for path in self.config_paths:
-            self.log.add_to_log(f'Searching for files in "{os.path.abspath(path)}"')
+            self.log.debug(f'Searching for files in "{os.path.abspath(path)}"')
 
-            for file in os.listdir(path):
-                file = self.check_config_file(file)
-                if file is not None:
-                    config_files[file] = os.path.join(path, file)
+            for f in os.listdir(path):
+                f = self.check_config_file(f)
+                if f is not None:
+                    config_files[f] = os.path.join(path, f)
 
-            self.log.add_to_log(f'All found files: {config_files}')
+            self.log.debug(f'All found files: {config_files}')
             
-
         return config_files
 
     def check_config_file(self ,file):
@@ -60,9 +54,5 @@ class ConfigFinder:
                 return None 
         
 
-        self.log.add_to_log(f'Found new file: {file}')
+        self.log.debug(f'Found new file: {file}')
         return file
-
-
-
-

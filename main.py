@@ -1,6 +1,7 @@
 import os
 import configFinder
 import argparse
+import logger
 
 
 def run():
@@ -18,12 +19,15 @@ def run():
     include = args.include
     verbose_mode = args.verbose
 
-    finder = configFinder.ConfigFinder()
-    logger = finder.log
+    lc = logger.Logger(verbose= verbose_mode, file_name="config_finder.log")
+    finder = configFinder.ConfigFinder(log_class=lc)
+    log = lc.logger
+
 
     #Check for basic errors 
     if exclude is not None and include is not None:
-        print("You can't include and exclude files at the same time")
+        log.error("You can't include and exclude files at the same time")
+        log.info("Program exited with status code 1")
         exit(1)
     elif exclude is not None:
         finder.add_files_to_exclude(exclude)
@@ -32,14 +36,16 @@ def run():
         
     paths = []       
     if home_env is None or home_env == "":
-        logger.add_to_log(f"Enviroment variable '{args.env}' is unknown", verbose=True)
+        log.error(f"Enviroment variable '{args.env}' is unknown")
+        log.info("Program exited with status code 1")
         exit(1)
 
     else:
         paths = home_env.split(':')
         
     if len(paths) <= 1:
-        logger.add_to_log("Not enough paths found", verbose=True)
+        log.error("Not enough paths found")
+        log.info("Program exited with status code 1")
         exit(1)
 
     for i in paths:
@@ -50,9 +56,10 @@ def run():
     res_string = "Final result before formatting:\n"
     for key, val in res.items():
         res_string += f'{key}: {val}\n'
-    logger.add_to_log(res_string)
-    
+    log.info(res_string)
+
     print([x for x in res.values()])
+    exit(0)
 
 
 
